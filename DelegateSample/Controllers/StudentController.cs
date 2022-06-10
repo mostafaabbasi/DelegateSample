@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Models.Dto;
 using Services;
+using Polly;
 
 namespace DelegateSample.Controllers
 {
@@ -18,7 +19,9 @@ namespace DelegateSample.Controllers
         [HttpPost]
         public async Task Add(StudentQuery model)
         {
-            await studentService.Add(model);
+            var policy = Policy.Handle<Exception>().RetryAsync(5);
+
+            await policy.ExecuteAsync(async () => await studentService.Add(model));
         }
     }
 }
